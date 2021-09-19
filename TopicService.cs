@@ -22,17 +22,17 @@ namespace WebForum
         }
 
         /// <summary>
-        /// Creates topicControl from entered parameters
+        /// Creates TopicDTO from entered parameters
         /// </summary>
         /// <param name="id"></param>
         /// <param name="userName"></param>
         /// <param name="name"></param>
         /// <param name="text"></param>
-        /// <returns>Created topicControl</returns>
-        public TopicControl CreateTopicControl(string id, string userName, string name, string text)
+        /// <returns>Created TopicDTO</returns>
+        public TopicControl CreateTopicDTO(string id, string userName, string name, string text)
         {
-            var topicControl = new TopicControl { Date = DateTime.Now.ToString(), UserId = id, UserName = userName, Text = text, Name = name, Messages = new PagedMessagesModel() };
-            return topicControl;
+            var topicDto = new TopicControl { Date = DateTime.Now.ToString(), UserId = id, UserName = userName, Text = text, Name = name, Messages = new PagedMessagesModel() };
+            return topicDto;
         }
 
         public NewMessageFormModel Create(int topicId)
@@ -99,9 +99,9 @@ namespace WebForum
             {
                 return;
             }
-            var topicControl = CreateTopicControl(userId, userName, topicViewformDTO.Name, topicViewformDTO.Text);
+            var topicDTO = CreateTopicDTO(userId, userName, topicViewformDTO.Name, topicViewformDTO.Text);
             var user = _unitOfWork.UserManager.FindByIdAsync(userId).Result;
-            var topic = _mapper.Map<TopicControl, Topic>(topicControl);
+            var topic = _mapper.Map<TopicControl, Topic>(topicDTO);
             topic.ForumUser = user;
             await _unitOfWork.TopicRepository.AddAsync(topic);
             await _unitOfWork.SaveAsync();

@@ -26,7 +26,7 @@ namespace WebForum
         /// </summary>
         /// <param name="userDto"></param>
         /// <returns></returns>
-        public async Task<OperationDetails> Create(UserControl userDto)
+        public async Task<OperationDetails> Create(UserGeneral userDto)
         {
             ForumUser user = await _database.UserManager.FindByEmailAsync(userDto.Email);
             if (user == null)
@@ -42,7 +42,7 @@ namespace WebForum
                 
                 await _database.UserManager.AddToRoleAsync(user.Id, userDto.Role.First());
                 
-                ForumProfile clientProfile = new ForumProfile { Id = user.Id, Address = userDto.Address, Name = userDto.Name };
+                ForumUser clientProfile = new ForumUser { Id = user.Id, Address = userDto.Address, Name = userDto.Name };
                 _database.ClientManager.Create(clientProfile);
                 await _database.SaveAsync();
                 return new OperationDetails(true, "New User created", "");
@@ -66,9 +66,9 @@ namespace WebForum
             }
             else
             {
-                if (user.ForumProfile != null)
+                if (user != null)
                 {
-                    await _database.ClientManager.Delete(user.ForumProfile);
+                    await _database.ClientManager.Delete(user);
                 }
                 _database.MessageRepository.DeleteAllUserMessages(user.Id);
                 _database.TopicRepository.DeleteAllUserTopics(user.Id);
@@ -77,7 +77,7 @@ namespace WebForum
             }
         }
         
-        public async Task<ClaimsIdentity> Authenticate(UserControl userDto)
+        public async Task<ClaimsIdentity> Authenticate(UserGeneral userDto)
         {
             ClaimsIdentity claim = null;
             
@@ -90,7 +90,7 @@ namespace WebForum
         }
 
        
-        public async Task SetInitialData(UserControl adminDto, List<string> roles)
+        public async Task SetInitialData(UserGeneral adminDto, List<string> roles)
         {
             foreach (string roleName in roles)
             {
@@ -103,11 +103,11 @@ namespace WebForum
             }
             await Create(adminDto);
         }
-        public IEnumerable<UserControl> GetAllUsers()
+        public IEnumerable<UserGeneral> GetAllUsers()
         {
             
             var users = _database.UserManager.Users;
-            var outputlist = _mapper.MapList<ForumUser, UserControl>(users);
+            var outputlist = _mapper.MapList<ForumUser, UserGeneral>(users);
             foreach(var user in outputlist)
             {
                 user.Role = (List<string>)_database.UserManager.GetRoles(user.Id);
